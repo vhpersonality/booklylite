@@ -22,7 +22,13 @@ const weekStart = computed(() => startOfWeek(selectedDate.value, { locale: ru, w
 const weekEnd = computed(() => endOfWeek(selectedDate.value, { locale: ru, weekStartsOn: 1 }))
 const weekDays = computed(() => eachDayOfInterval({ start: weekStart.value, end: weekEnd.value }))
 
-const dayHours = Array.from({ length: 11 }, (_, i) => 10 + i) // 10:00 - 20:00
+const dayHours = Array.from({ length: 24 }, (_, i) => i + 1) // 1:00 - 24:00
+
+// Для дневного вида - дни недели для мини-календаря
+const dayViewWeekDays = computed(() => {
+  const start = startOfWeek(selectedDate.value, { locale: ru, weekStartsOn: 1 })
+  return eachDayOfInterval({ start, end: endOfWeek(selectedDate.value, { locale: ru, weekStartsOn: 1 }) })
+})
 
 // Получаем все события для отображения в календаре (без фильтрации по дате)
 const { data: allEvents, refresh: refreshEvents } = await useFetch<Event[]>('/api/events')
@@ -58,9 +64,9 @@ function getEventPosition(event: Event, date: Date): { top: string, height: stri
   const startMinutes = startHour * 60 + startMinute
   const endMinutes = startMinutes + duration
 
-  const dayStartMinutes = 10 * 60 // 10:00 AM
+  const dayStartMinutes = 1 * 60 // 1:00 AM
   const relativeStart = startMinutes - dayStartMinutes
-  const totalDayMinutes = 11 * 60 // 10:00 AM - 21:00 (11 hours)
+  const totalDayMinutes = 24 * 60 // 1:00 - 24:00 (24 hours)
 
   const topPercent = (relativeStart / totalDayMinutes) * 100
   const heightPercent = (duration / totalDayMinutes) * 100
@@ -199,13 +205,33 @@ function toggleColorMode() {
       <div class="flex-1 overflow-auto">
         <!-- Дневной вид -->
         <div v-if="viewMode === 'day'" class="relative h-full">
+          <!-- Мини-календарь дней недели -->
+          <div class="flex border-b border-default mb-2">
+            <div class="w-20 shrink-0"></div>
+            <div class="flex-1 grid grid-cols-7">
+              <div
+                v-for="day in dayViewWeekDays"
+                :key="day.getTime()"
+                class="border-l border-default p-2 text-center cursor-pointer transition-colors"
+                :class="{
+                  'bg-primary/10': isSameDay(day, selectedDate),
+                  'hover:bg-elevated/50': !isSameDay(day, selectedDate)
+                }"
+                @click="selectedDate = day; router.push({ query: { ...route.query, date: format(day, 'yyyy-MM-dd') } })"
+              >
+                <div class="text-xs text-muted">{{ format(day, 'EEE', { locale: ru }) }}</div>
+                <div class="text-sm font-medium">{{ format(day, 'd') }}</div>
+              </div>
+            </div>
+          </div>
+
           <div class="flex">
             <!-- Временная шкала -->
             <div class="w-20 shrink-0 pt-12">
               <div
                 v-for="hour in dayHours"
                 :key="hour"
-                class="h-24 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
+                class="h-12 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
               >
                 {{ hour }}:00
               </div>
@@ -216,10 +242,10 @@ function toggleColorMode() {
               <div
                 v-for="hour in dayHours"
                 :key="hour"
-                class="h-24 border-b border-default relative"
+                class="h-12 border-b border-default relative"
               >
                 <!-- Полчаса -->
-                <div class="absolute top-12 left-0 right-0 h-12 border-t border-dashed border-default/50" />
+                <div class="absolute top-6 left-0 right-0 h-6 border-t border-dashed border-default/50" />
               </div>
 
               <!-- Кликабельные ячейки для записи (сначала, чтобы быть под событиями) -->
@@ -229,8 +255,8 @@ function toggleColorMode() {
                   :key="hour"
                   class="absolute left-0 right-0 cursor-pointer hover:bg-primary/5 transition-colors"
                   :style="{
-                    top: `${((hour - 10) * 96)}px`,
-                    height: '96px'
+                    top: `${((hour - 1) * 48)}px`,
+                    height: '48px'
                   }"
                   @click="handleTimeSlotClick(selectedDate, hour)"
                 />
@@ -289,13 +315,13 @@ function toggleColorMode() {
 
                 <!-- Временные слоты -->
                 <div class="relative">
-                  <div
-                    v-for="hour in dayHours"
-                    :key="hour"
-                    class="h-24 border-b border-default relative"
-                  >
-                    <div class="absolute top-12 left-0 right-0 h-12 border-t border-dashed border-default/50" />
-                  </div>
+                    <div
+                      v-for="hour in dayHours"
+                      :key="hour"
+                      class="h-12 border-b border-default relative"
+                    >
+                      <div class="absolute top-6 left-0 right-0 h-6 border-t border-dashed border-default/50" />
+                    </div>
 
                   <!-- Кликабельные ячейки для записи (сначала, чтобы быть под событиями) -->
                   <div class="absolute inset-0 z-0">
@@ -304,8 +330,8 @@ function toggleColorMode() {
                       :key="hour"
                       class="absolute left-0 right-0 cursor-pointer hover:bg-primary/5 transition-colors"
                       :style="{
-                        top: `${((hour - 10) * 96)}px`,
-                        height: '96px'
+                        top: `${((hour - 1) * 48)}px`,
+                        height: '48px'
                       }"
                       @click="handleTimeSlotClick(day, hour)"
                     />

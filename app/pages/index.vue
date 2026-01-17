@@ -63,7 +63,7 @@ const weekDays = computed(() => eachDayOfInterval({ start: weekStart.value, end:
 // Для дневного вида
 const dayHours = computed(() => {
   const hours = []
-  for (let i = 10; i <= 20; i++) {
+  for (let i = 1; i <= 24; i++) {
     hours.push(i)
   }
   return hours
@@ -100,10 +100,10 @@ function getBookingPosition(booking: Booking, date: Date): { top: string, height
   const endMinutes = endHour * 60 + endMinute
   const duration = endMinutes - startMinutes
   
-  // Начало дня в 10:00 = 600 минут
-  const dayStartMinutes = 10 * 60
+  // Начало дня в 1:00 = 60 минут
+  const dayStartMinutes = 1 * 60
   const relativeStart = startMinutes - dayStartMinutes
-  const totalDayMinutes = 11 * 60 // 10:00 - 21:00 = 11 часов
+  const totalDayMinutes = 24 * 60 // 1:00 - 24:00 = 24 часа
   
   const topPercent = (relativeStart / totalDayMinutes) * 100
   const heightPercent = (duration / totalDayMinutes) * 100
@@ -119,10 +119,10 @@ function getEventPosition(event: Event, date: Date): { top: string, height: stri
   const startMinutes = startHour * 60 + startMinute
   const endMinutes = startMinutes + event.duration
   
-  // Начало дня в 10:00 = 600 минут
-  const dayStartMinutes = 10 * 60
+  // Начало дня в 1:00 = 60 минут
+  const dayStartMinutes = 1 * 60
   const relativeStart = startMinutes - dayStartMinutes
-  const totalDayMinutes = 11 * 60 // 10:00 - 21:00 = 11 часов
+  const totalDayMinutes = 24 * 60 // 1:00 - 24:00 = 24 часа
   
   const topPercent = (relativeStart / totalDayMinutes) * 100
   const heightPercent = (event.duration / totalDayMinutes) * 100
@@ -265,13 +265,33 @@ watch(viewMode, () => updateRoute())
       <div class="flex-1 overflow-auto">
         <!-- Дневной вид -->
         <div v-if="viewMode === 'day'" class="relative h-full">
+          <!-- Мини-календарь дней недели -->
+          <div class="flex border-b border-default mb-2">
+            <div class="w-20 shrink-0"></div>
+            <div class="flex-1 grid grid-cols-7">
+              <div
+                v-for="day in dayViewWeekDays"
+                :key="day.getTime()"
+                class="border-l border-default p-2 text-center cursor-pointer transition-colors"
+                :class="{
+                  'bg-primary/10': isSameDay(day, selectedDate),
+                  'hover:bg-elevated/50': !isSameDay(day, selectedDate)
+                }"
+                @click="selectedDate = day; updateRoute()"
+              >
+                <div class="text-xs text-muted">{{ format(day, 'EEE', { locale: ru }) }}</div>
+                <div class="text-sm font-medium">{{ format(day, 'd') }}</div>
+              </div>
+            </div>
+          </div>
+
           <div class="flex">
             <!-- Временная шкала -->
             <div class="w-20 shrink-0 pt-12">
               <div
                 v-for="hour in dayHours"
                 :key="hour"
-                class="h-24 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
+                class="h-12 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
               >
                 {{ hour }}:00
               </div>
@@ -282,10 +302,10 @@ watch(viewMode, () => updateRoute())
               <div
                 v-for="hour in dayHours"
                 :key="hour"
-                class="h-24 border-b border-default relative"
+                class="h-12 border-b border-default relative"
               >
                 <!-- Полчаса -->
-                <div class="absolute top-12 left-0 right-0 h-12 border-t border-dashed border-default/50" />
+                <div class="absolute top-6 left-0 right-0 h-6 border-t border-dashed border-default/50" />
               </div>
 
               <!-- Бронирования -->
@@ -335,7 +355,7 @@ watch(viewMode, () => updateRoute())
               <div
                 v-for="hour in dayHours"
                 :key="hour"
-                class="h-24 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
+                class="h-12 border-b border-default flex items-start justify-end pr-2 text-xs text-muted"
               >
                 {{ hour }}:00
               </div>
@@ -362,9 +382,9 @@ watch(viewMode, () => updateRoute())
                   <div
                     v-for="hour in dayHours"
                     :key="hour"
-                    class="h-24 border-b border-default relative"
+                    class="h-12 border-b border-default relative"
                   >
-                    <div class="absolute top-12 left-0 right-0 h-12 border-t border-dashed border-default/50" />
+                    <div class="absolute top-6 left-0 right-0 h-6 border-t border-dashed border-default/50" />
                   </div>
 
                   <!-- Бронирования для этого дня -->
