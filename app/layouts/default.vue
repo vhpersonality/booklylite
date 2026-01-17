@@ -7,7 +7,7 @@ const router = useRouter()
 const toast = useToast()
 
 const open = ref(false)
-const selectedScheduleDate = ref<Date>(route.path === '/schedule' && route.query.date ? new Date(route.query.date as string) : new Date())
+const selectedScheduleDate = ref<Date>(route.path === '/' && route.query.date ? new Date(route.query.date as string) : new Date())
 
 const { data: scheduleBookings } = await useFetch<Booking[]>('/api/bookings', {
   default: () => []
@@ -15,9 +15,9 @@ const { data: scheduleBookings } = await useFetch<Booking[]>('/api/bookings', {
 
 function handleDateSelect(date: Date) {
   selectedScheduleDate.value = date
-  if (route.path !== '/schedule') {
+  if (route.path !== '/') {
     router.push({
-      path: '/schedule',
+      path: '/',
       query: {
         date: date.toISOString().split('T')[0]
       }
@@ -33,22 +33,15 @@ function handleDateSelect(date: Date) {
 }
 
 watch(() => route.query.date, (date) => {
-  if (date && route.path === '/schedule') {
+  if (date && route.path === '/') {
     selectedScheduleDate.value = new Date(date as string)
   }
 })
 
 const links = [[{
-  label: 'Главная',
-  icon: 'i-lucide-house',
-  to: '/',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
   label: 'Расписание',
   icon: 'i-lucide-calendar',
-  to: '/schedule',
+  to: '/',
   onSelect: () => {
     open.value = false
   }
