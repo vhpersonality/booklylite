@@ -86,4 +86,8 @@ export interface Event {
   startTime: string // HH:mm format
   duration: number // продолжительность в минутах
   bookedSlots: number // количество забронированных мест
+  serviceId?: number // ID услуги (опционально)
+  employeeId?: number // ID сотрудника (опционально)
+  serviceName?: string // название услуги (для отображения)
+  employeeName?: string // имя сотрудника (для отображения)
 }

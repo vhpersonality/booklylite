@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { format, startOfDay, endOfDay, eachDayOfInterval, startOfWeek, endOfWeek, addDays, isSameDay, parse } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import type { Booking, Member, Event } from '~/types'
+import type { Booking, Member, Event, Service } from '~/types'
 import { h, resolveComponent } from 'vue'
 
 const route = useRoute()
@@ -22,6 +22,10 @@ const { data: bookings } = await useFetch<Booking[]>('/api/bookings', {
 })
 
 const { data: members } = await useFetch<Member[]>('/api/members', {
+  default: () => []
+})
+
+const { data: services } = await useFetch<Service[]>('/api/services', {
   default: () => []
 })
 
@@ -133,6 +137,18 @@ function getEventsForDate(date: Date): Event[] {
   if (!allEvents.value) return []
   const dateStr = format(date, 'yyyy-MM-dd')
   return allEvents.value.filter(e => e.date === dateStr)
+}
+
+function getServiceName(serviceId?: number): string {
+  if (!serviceId || !services.value) return ''
+  const service = services.value.find(s => s.id === serviceId)
+  return service?.name || ''
+}
+
+function getEventEmployeeName(employeeId?: number): string {
+  if (!employeeId || !members.value) return ''
+  const member = members.value.find(m => m.id === employeeId)
+  return member?.name || ''
 }
 
 function handleEventSaved() {
@@ -292,7 +308,11 @@ watch(viewMode, () => updateRoute())
                   :style="getEventPosition(event, selectedDate)"
                 >
                   <div class="font-medium">{{ event.startTime }} {{ event.name }}</div>
-                  <div class="text-xs opacity-90">{{ event.bookedSlots }}/{{ event.maxParticipants }} мест</div>
+                  <div class="text-xs opacity-90">
+                    <span v-if="event.serviceId">{{ getServiceName(event.serviceId) }}</span>
+                    <span v-if="event.employeeId" :class="event.serviceId ? 'ml-2' : ''">{{ getEventEmployeeName(event.employeeId) }}</span>
+                    <span class="ml-2">{{ event.bookedSlots }}/{{ event.maxParticipants }} мест</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -364,8 +384,11 @@ watch(viewMode, () => updateRoute())
                       class="absolute left-1 right-1 rounded-md p-1.5 bg-purple-500 text-white text-xs cursor-pointer hover:opacity-90 transition-opacity border border-purple-600"
                       :style="getEventPosition(event, day)"
                     >
-                      <div class="font-medium truncate">{{ event.startTime }}</div>
-                      <div class="truncate">{{ event.name }}</div>
+                      <div class="font-medium truncate">{{ event.startTime }} {{ event.name }}</div>
+                      <div class="truncate text-xs/90">
+                        <span v-if="event.serviceId">{{ getServiceName(event.serviceId) }}</span>
+                        <span v-if="event.employeeId" :class="event.serviceId ? 'ml-1' : ''">{{ getEventEmployeeName(event.employeeId) }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>

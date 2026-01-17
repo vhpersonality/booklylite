@@ -29,7 +29,9 @@ export default eventHandler(async (event) => {
       date: body.date,
       startTime: body.startTime,
       duration: body.duration || 60,
-      bookedSlots: 0
+      bookedSlots: 0,
+      serviceId: body.serviceId,
+      employeeId: body.employeeId
     }
 
     events.push(newEvent)
@@ -42,7 +44,10 @@ export default eventHandler(async (event) => {
 
     const index = events.findIndex(e => e.id === id)
     if (index !== -1) {
-      events[index] = { ...events[index], ...body }
+      events[index] = {
+        ...events[index],
+        ...body
+      }
       return events[index]
     }
 
