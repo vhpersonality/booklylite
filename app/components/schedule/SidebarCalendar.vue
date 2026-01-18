@@ -106,20 +106,17 @@ function goToToday() {
         v-for="day in calendarDays"
         :key="day.getTime()"
         type="button"
-        class="relative aspect-square text-xs rounded-md transition-colors flex items-center justify-center"
+        class="aspect-square text-xs rounded-md transition-colors flex items-center justify-center cursor-pointer select-none touch-none"
         :class="[
           isCurrentMonth(day) ? 'text-highlighted' : 'text-dimmed',
           isSelected(day) ? 'bg-primary text-primary-foreground font-semibold' : 'hover:bg-elevated',
           isToday(day) && !isSelected(day) ? 'ring-2 ring-primary/50' : ''
         ]"
-        @click="selectDate(day)"
+        @click.stop="selectDate(day)"
+        @mousedown.stop
+        @touchstart.stop
       >
         {{ format(day, 'd') }}
-        <span
-          v-if="hasBookings(day)"
-          class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-          :class="isSelected(day) ? 'bg-primary-foreground' : 'bg-primary'"
-        />
       </button>
     </div>
 
