@@ -140,10 +140,12 @@ function toggleColorMode() {
       <UDashboardNavbar :title="viewMode === 'day' ? format(selectedDate, 'd MMMM, EEEE', { locale: ru }) : `Неделя ${format(weekStart, 'd MMM', { locale: ru })} - ${format(weekEnd, 'd MMM', { locale: ru })}`">
         <template #leading>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center shrink-0">
-              <span class="text-white font-bold text-lg">B</span>
-            </div>
-            <span class="text-lg font-semibold">BooklyLite</span>
+            <UAvatar
+              src="https://github.com/benjamincanac.png"
+              alt="Benjamin Canac"
+              size="md"
+            />
+            <span class="text-lg font-semibold">Benjamin Canac</span>
           </div>
         </template>
 
