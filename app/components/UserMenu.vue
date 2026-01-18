@@ -24,7 +24,8 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   icon: 'i-lucide-user'
 }, {
   label: 'Оплата',
-  icon: 'i-lucide-credit-card'
+  icon: 'i-lucide-credit-card',
+  to: '/payment'
 }, {
   label: 'Настройки',
   icon: 'i-lucide-settings',
