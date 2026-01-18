@@ -2,6 +2,11 @@
 import { sub } from 'date-fns'
 import type { Period, Range } from '~/types'
 
+definePageMeta({
+  layout: 'dashboard',
+  middleware: 'auth'
+})
+
 const range = shallowRef<Range>({
   start: sub(new Date(), { days: 14 }),
   end: new Date()

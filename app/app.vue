@@ -17,18 +17,60 @@ useHead({
   }
 })
 
-const title = 'Nuxt Dashboard Template'
-const description = 'A professional dashboard template built with Nuxt UI, featuring multiple pages, data visualization, and comprehensive management capabilities for creating powerful admin interfaces.'
-
 useSeoMeta({
-  title,
-  description,
-  ogTitle: title,
-  ogDescription: description,
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/dashboard-light.png',
-  twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/dashboard-light.png',
+  titleTemplate: '%s - BooklyLite',
+  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/saas-light.png',
+  twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/saas-light.png',
   twitterCard: 'summary_large_image'
 })
+
+// Navigation для docs (если используется)
+const route = useRoute()
+const isDocsPage = computed(() => route.path.startsWith('/docs'))
+
+const { data: navigation } = await useAsyncData('navigation', async () => {
+  try {
+    const data = await queryCollectionNavigation('docs')
+    return data.find(item => item.path === '/docs')?.children || []
+  } catch {
+    return []
+  }
+}, {
+  default: () => []
+})
+
+const { data: files } = useLazyAsyncData('search', async () => {
+  try {
+    return await queryCollectionSearchSections('docs')
+  } catch {
+    return []
+  }
+}, {
+  server: false,
+  default: () => []
+})
+
+const links = [{
+  label: 'Docs',
+  icon: 'i-lucide-book',
+  to: '/docs/getting-started'
+}, {
+  label: 'Pricing',
+  icon: 'i-lucide-credit-card',
+  to: '/pricing'
+}, {
+  label: 'Blog',
+  icon: 'i-lucide-pencil',
+  to: '/blog'
+}, {
+  label: 'Changelog',
+  icon: 'i-lucide-history',
+  to: '/changelog'
+}]
+
+if (isDocsPage.value) {
+  provide('navigation', navigation)
+}
 </script>
 
 <template>
@@ -38,5 +80,16 @@ useSeoMeta({
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+
+    <ClientOnly>
+      <LazyUContentSearch
+        v-if="isDocsPage"
+        :files="files"
+        shortcut="meta_k"
+        :navigation="navigation"
+        :links="links"
+        :fuse="{ resultLimit: 42 }"
+      />
+    </ClientOnly>
   </UApp>
 </template>

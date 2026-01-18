@@ -6,6 +6,11 @@ import type { Row } from '@tanstack/table-core'
 import type { User } from '~/types'
 import { h, resolveComponent } from 'vue'
 
+definePageMeta({
+  layout: 'dashboard',
+  middleware: 'auth'
+})
+
 const UAvatar = resolveComponent('UAvatar')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
